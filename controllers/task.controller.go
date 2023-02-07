@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jcarvallo/golang-api-rest/db"
 	"github.com/jcarvallo/golang-api-rest/models"
+	"github.com/jcarvallo/golang-api-rest/utils"
 )
 
 func GetTasks(w http.ResponseWriter, r *http.Request) {
@@ -19,9 +20,8 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	db.DB.First(&task, params["id"])
 	if task.ID == 0 {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Task not found"))
-		return
+		utils.RespondNotFound("Task not found", w)
+
 	}
 	db.DB.Model(&task).Association("Task").Find(&task.UserID)
 	json.NewEncoder(w).Encode(&task)
@@ -33,9 +33,8 @@ func PostTask(w http.ResponseWriter, r *http.Request) {
 	createTask := db.DB.Create(&task)
 	error := createTask.Error
 	if error != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(error.Error()))
-		return
+		utils.RespondWithError(error, w)
+
 	}
 	json.NewEncoder(w).Encode(&task)
 }
@@ -44,11 +43,10 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	db.DB.First(&task, params["id"])
 	if task.ID == 0 {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("task not found"))
-		return
+		utils.RespondNotFound("Task not found", w)
+
 	}
 	db.DB.Unscoped().Delete(&task)
-	w.WriteHeader(http.StatusNoContent)
-	w.Write([]byte("task delete"))
+	utils.RespondNotContent("task delete", w)
+
 }

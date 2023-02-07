@@ -21,4 +21,5 @@ func main() {
 	routes.RoutersIndex()
 
 	http.ListenAndServe(":"+os.Getenv("SERVER_PORT"), routes.Routes)
+	log.Println("Server http://localhost:" + os.Getenv("SERVER_PORT"))
 }
